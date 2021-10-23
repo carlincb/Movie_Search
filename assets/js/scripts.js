@@ -13,21 +13,26 @@ let currentMovie = {};
 
 /**
  * @description - This function deletes the favorite based on id.
- * @param  {string} movieId
+ * @param  {string} movieIamDeleting
  */
-const deleteFavorite = (movieId) => {
+const deleteFavorite = (movieIamDeleting) => {
   // TODO: grabs the localstorage and parses the string into an array
-
+  const favorites = JSON.parse(localStorage.getItem("favorites"));
   // TODO: checks if the favorites variable is truthy and if the movieId exists
+  if (favorites && movieId) {
 
   // TODO: filter the array and return the array without the movieId
+  const newFavorites = favorites.filter((movie) => movie.imdbID !== movieIamDeleting);
 
   // TODO: set the localstorage to the updated array
-  
+  localStorage.setItem("favorites", JSON.stringify(newFavorites));
+
   // TODO: remove the favorites container
+  favoritesContainer.innerHTML = "";
 
   // TODO: get the favorites again
-
+  getFavorites();
+}
 };
 
 /**
@@ -73,7 +78,7 @@ const getFavorites = () => {
           <p class="card-rating">Rating: ${Rated}</p>
           <p class="card-plot text-left">Plot: ${Plot}</p>
           <p class="card-plot text-left">ImdbId: ${imdbID}</p>
-          <button class="btn btn-danger" data-id="${imdbID}" id="delete-favorite">Delete</button>
+          <button class="btn btn-danger" data-movieid="${imdbID}" id="delete-favorite">Delete</button>
         </div>
       `;
 
@@ -110,11 +115,12 @@ const renderMovieData = (movieObj) => {
  * @param  {string} movie
  */
 const queryOMDB = async (movie) => {
+  console.log(movie);
   // Async/Await is syntactic sugar for promises and will make working with asyncrhonous code easier.
   try {
     // the await keyword is used to wait for a promise to resolve before continuing.
     // TODO: fetch the data from the API and wait for the response
-    const response = await fetch(`https://wwww.omdbapi.com/?apikey=trilogy&t=${movie}`);
+    const response = await fetch(`https://www.omdbapi.com/?apikey=trilogy&t=${movie}`);
 
     // TODO: await the response and store it in a variable as an object
     const json = await response.json();
@@ -180,6 +186,11 @@ movieForm.addEventListener("submit", (e) => {
  */
 
 // TODO: add event listener to delete favorites using event delegation
-
+document.addEventListener("click", function(e){
+  if(e.target && e.target.id === "delete-favorite"){
+    console.log(e.target.dataset.movieid)
+    deleteFavorite(e.target.dataset.movieid);
+  }
+});
 // get the favorites on page load
 getFavorites();
