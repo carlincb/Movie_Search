@@ -9,6 +9,7 @@ const movieRating = document.getElementById("movie-rating");
 const moviePlot = document.getElementById("movie-plot");
 const movieId = document.getElementById("movie-id");
 const saveFavorite = document.getElementById("save-favorite");
+let currentMovie = {};
 
 /**
  * @description - This function deletes the favorite based on id.
@@ -38,16 +39,16 @@ const setFavorite = (movieObject) => {
 
   if (favorites) {
     // TODO: spreads in the existing favorites array and adds the new favorite object to the array then stringifies it and sets the localstorage
-
+    localStorage.setItem("favorites", JSON.stringify([...favorites, movieObject]))
   } else {
     // TODO: sets the localstorage to the new favorite object if no favorites exist
-
+    localStorage.setItem("favorites", JSON.stringify([movieObject]));
   }
 
   // TODO: remove the favorites container
-
+  favoritesContainer.innerHTML = "";
   // TODO: get the favorites again
-
+  getFavorites();
 };
 
 /**
@@ -59,9 +60,9 @@ const getFavorites = () => {
     // loop through the favorites array and render the UI
     favorites.forEach((movie) => {
       // TODO: create a new div element
-
+      const movieCard = document.createElement("div");
       // TODO: use object destructuring to get the movie properties
-
+      const {Title, Director, Poster, Rated, Plot, imdbID} = movie;
       
       movieCard.classList.add("card", "favorites", "m-2");
       movieCard.innerHTML = `
@@ -77,7 +78,7 @@ const getFavorites = () => {
       `;
 
       // TODO: append the new div to the favorites container
- 
+    favoritesContainer.appendChild(movieCard)
     });
   }
 };
@@ -90,7 +91,7 @@ const renderMovieData = (movieObj) => {
   console.log(movieObj);
 
   // TODO: destructure the movieObj object
-
+  const {Title, Director, Poster, Rated, Plot, imdbID} = movieObj;
   // Update the DOM elements with the movie data
   movieTitle.textContent = Title;
   movieDirector.textContent = Director;
@@ -113,10 +114,11 @@ const queryOMDB = async (movie) => {
   try {
     // the await keyword is used to wait for a promise to resolve before continuing.
     // TODO: fetch the data from the API and wait for the response
+    const response = await fetch(`https://wwww.omdbapi.com/?apikey=trilogy&t=${movie}`);
 
     // TODO: await the response and store it in a variable as an object
-
-
+    const json = await response.json();
+    console.log(json);
     // we are returning the renderMovieData function with the json object as an argument.  The await response.json() parses the response into a JS Object.
     // technically we could just call the renderMovieData function and omit the return statement.
     return renderMovieData(json);
@@ -134,10 +136,16 @@ saveFavorite.addEventListener("click", (e) => {
   e.preventDefault(); // this prevents the form from refreshing the page
 
   // TODO: create an object from the DOM elements
-  const movie = {};
-
+  const movie = {
+    Title: movieTitle.textContent,
+    Director: movieDirector.textContent,
+    Poster: moviePoster.src,
+    Rated: movieRating.textContent,
+    Plot: moviePlot.textContent,
+    imdbID: movieId.textContent,
+  };
   // TODO: call the setFavorite function with the movie object as an argument
-  
+  setFavorite(movie);
 });
 
 /**
@@ -157,9 +165,9 @@ movieForm.addEventListener("submit", (e) => {
     movie.classList.remove("is-invalid");
 
     // TODO: call the queryOMDB function with the movie value as an argument
-
+    queryOMDB(movie.value);
     // TODO: clear the input field
-    
+    movie.value = "";
   } else {
     // add class if invalid
     movie.classList.add("is-invalid");
